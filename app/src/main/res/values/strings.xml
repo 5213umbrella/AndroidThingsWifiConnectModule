@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">WifiModule</string>
+
+    <string name="wifi_detail"> Wi-Fi 이름 : %1$s \n</string>
+    <string name="btn_connect">연결</string>
+
+</resources>
