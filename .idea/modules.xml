@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RaspBlackEyeWifi.iml" filepath="$PROJECT_DIR$/RaspBlackEyeWifi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/WiFIModule.iml" filepath="$PROJECT_DIR$/WiFIModule.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

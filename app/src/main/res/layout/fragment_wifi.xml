@@ -7,9 +7,18 @@
                 android:background="@drawable/on_pressed_background"
                 android:orientation="horizontal">
 
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/wifi_icon"
+        android:src="@drawable/wifi_6045_4"/>
     <TextView
+        android:text="미정"
         android:id="@+id/wifi_name"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/wifi_icon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
-</RelativeLayout>
+        android:layout_marginTop="5dp"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:layout_height="wrap_content"/></RelativeLayout>

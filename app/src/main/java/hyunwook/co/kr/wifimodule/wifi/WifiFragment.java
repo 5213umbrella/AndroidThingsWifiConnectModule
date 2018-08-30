@@ -31,7 +31,7 @@ import hyunwook.co.kr.wifimodule.listener.OnWifiListener;
  * Created by hyunwook on 2018-08-29.
  */
 
-public class WifiFragment extends Fragment implements WifiContract.View, OnWifiListener, OnListFragmentInteractionListener{
+public class WifiFragment extends Fragment implements WifiContract.View, OnWifiListener, OnListFragmentInteractionListener {
 
     private final IntentFilter intentFilter = new IntentFilter();
     WifiManager mManager;
@@ -108,7 +108,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     @Override
     public void resultAvailable() {
         Log.d(TAG, "resultAvailable ======");
-        startScan();;
+//        startScan();;
     }
 
     @Override
@@ -116,6 +116,10 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         if (mManager.isWifiEnabled()) {
             //wifi 이용가능
             showProgress(true);
+
+            fetchDevices();
+            showWifiDevices();
+            showProgress(false);
 
 
         } else {
@@ -128,7 +132,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         if (progressBar != null) {
             progressBar.setVisibility((visibility) ? View.VISIBLE : View.INVISIBLE);
         }
-        fetchDevices();
+//        fetchDevices();
     }
 
     @Override
@@ -138,7 +142,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         Log.d(TAG, "wifi List size check ===>" + wifiList.size());
 
-        showWifiDevices();
+//        showWifiDevices();
     }
 
     @Override
@@ -148,7 +152,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         adapter.notifyDataSetChanged();
 
-        showProgress(false);
+//        showProgress(false);
     }
 
     //해당 ssid 클릭
@@ -187,6 +191,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", device.SSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", password);
+
 
         int netId = mManager.addNetwork(wifiConfig);
         Log.d(TAG, "connect ====>" + netId);
