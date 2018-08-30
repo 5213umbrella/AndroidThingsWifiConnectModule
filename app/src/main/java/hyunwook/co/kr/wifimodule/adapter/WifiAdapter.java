@@ -45,7 +45,13 @@ public class WifiAdapter extends RecyclerView.Adapter<WifiAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.wifiName.setText(holder.mItem.SSID);
+
+        if (holder.mItem.SSID.equals("")) {
+            Log.d(TAG, "SSID check fail...");
+        }
+        else {
+            holder.wifiName.setText(holder.mItem.SSID);
+        }
 //        holder.wifiImage.setImageResource(holder.m);
 
         int wifiSignalStrength = WifiManager.calculateSignalLevel(holder.mItem.level, 5);

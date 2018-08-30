@@ -13,7 +13,7 @@
         android:id="@+id/wifi_icon"
         android:src="@drawable/wifi_6045_4"/>
     <TextView
-        android:text="미정"
+        android:text="SSID가 없는 Wi-Fi"
         android:id="@+id/wifi_name"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/wifi_icon"

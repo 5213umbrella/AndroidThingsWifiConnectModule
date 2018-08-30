@@ -1,5 +1,6 @@
 package hyunwook.co.kr.wifimodule.wifi;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -63,14 +64,29 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wifi_list, container, false);
 
+      /*  ActionBar mActionBar = getActivity().getActionBar();
+        mActionBar.setDisplayShowHomeEnabled(false);
+        mActionBar.setDisplayShowTitleEnabled(false);
+
+        LayoutInflater mInflater = LayoutInflater.from(mContext);
+
+        View mcus*/
         mContext = getActivity();
 
         mRecyclerView = view.findViewById(R.id.list);
 
         progressBar = view.findViewById(R.id.progressBar);
 
+
         Button btnScan = view.findViewById(R.id.scanBtn);
         btnScan.setOnClickListener(view1 -> startScan());
+
+        Button btnFinish = view.findViewById(R.id.finishBtn);
+        btnFinish.setOnClickListener(view2 -> {
+            getActivity().moveTaskToBack(true);
+            getActivity().finish();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        });
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
