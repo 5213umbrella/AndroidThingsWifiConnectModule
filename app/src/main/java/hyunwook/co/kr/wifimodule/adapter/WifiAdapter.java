@@ -1,6 +1,7 @@
 package hyunwook.co.kr.wifimodule.adapter;
 
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;

@@ -18,7 +18,14 @@
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/wifi_icon"
         android:layout_width="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="1dp"
         android:textSize="20dp"
         android:textStyle="bold"
-        android:layout_height="wrap_content"/></RelativeLayout>
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_below="@+id/wifi_icon"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorAccent"></LinearLayout>
+</RelativeLayout>
