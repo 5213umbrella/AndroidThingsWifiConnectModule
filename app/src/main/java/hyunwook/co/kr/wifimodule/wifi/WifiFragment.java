@@ -2,13 +2,17 @@ package hyunwook.co.kr.wifimodule.wifi;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -23,6 +27,7 @@ import android.widget.ProgressBar;
 
 import java.util.List;
 
+import hyunwook.co.kr.wifimodule.ConnectingReceiver;
 import hyunwook.co.kr.wifimodule.R;
 import hyunwook.co.kr.wifimodule.adapter.WifiAdapter;
 import hyunwook.co.kr.wifimodule.listener.OnListFragmentInteractionListener;
@@ -83,9 +88,24 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         Button btnFinish = view.findViewById(R.id.finishBtn);
         btnFinish.setOnClickListener(view2 -> {
-            getActivity().moveTaskToBack(true);
+
+
+         /*   ComponentName componentName = getActivity().getPackageManager().getLaunchIntentForPackage("com.galarzaa.androidthings.samples").getComponent();
+            Intent intent = IntentCompat.makeRestartActivityTask(componentName);
+            startActivity(intent);*/
+            //와이파이 모듈 앱 종료
+           getActivity().moveTaskToBack(true);
             getActivity().finish();
             android.os.Process.killProcess(android.os.Process.myPid());
+
+           /* //메인 라즈베리파이 출퇴근 앱 재실행
+            PackageManager pm = getContext().getPackageManager();
+            Intent intent = pm.getLaunchIntentForPackage("com.galarzaa.androidthings.samples");
+            ComponentName cm = intent.getComponent();*/
+
+     /*       Intent mainIntent = Intent.makeRestartActivityTask(cm);
+            getContext().startActivity(mainIntent);
+            System.exit(0);*/
         });
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
@@ -217,6 +237,11 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     @Override
     public void connect(ScanResult device, String password) {
         showProgress(true);
+
+        Intent intent = new Intent(mContext, ConnectingReceiver.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        startActivity(intent);
 
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", device.SSID);
