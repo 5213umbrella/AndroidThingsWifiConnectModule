@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.v4.content.IntentCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -113,10 +115,12 @@ public class ConnectingReceiver extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }*/
-/*
+               ComponentName componentName = getPackageManager().getLaunchIntentForPackage("com.galarzaa.androidthings.samples").getComponent();
+            Intent sintent = IntentCompat.makeRestartActivityTask(componentName);
+            startActivity(sintent);
                 moveTaskToBack(true);
                 finish();
-                android.os.Process.killProcess(android.os.Process.myPid());*/
+                android.os.Process.killProcess(android.os.Process.myPid());
             }
         }
     };
