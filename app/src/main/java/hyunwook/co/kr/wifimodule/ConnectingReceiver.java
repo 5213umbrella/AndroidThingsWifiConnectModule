@@ -108,16 +108,9 @@ public class ConnectingReceiver extends Activity {
 
             if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
                 Log.d(TAG, "connected wifi...");
-
-
-          /*      try {
-                    Runtime.getRuntime().exec(new String[]{"reboot"});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
-               ComponentName componentName = getPackageManager().getLaunchIntentForPackage("com.galarzaa.androidthings.samples").getComponent();
-            Intent sintent = IntentCompat.makeRestartActivityTask(componentName);
-            startActivity(sintent);
+                ComponentName componentName = getPackageManager().getLaunchIntentForPackage("com.galarzaa.androidthings.samples").getComponent();
+                Intent sintent = IntentCompat.makeRestartActivityTask(componentName);
+                startActivity(sintent);
                 moveTaskToBack(true);
                 finish();
                 android.os.Process.killProcess(android.os.Process.myPid());
