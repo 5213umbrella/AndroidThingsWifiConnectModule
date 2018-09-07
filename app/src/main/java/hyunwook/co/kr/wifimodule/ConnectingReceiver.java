@@ -75,9 +75,7 @@ public class ConnectingReceiver extends Activity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    moveTaskToBack(true);
-                                    finish();
-                                    android.os.Process.killProcess(android.os.Process.myPid());
+                                 finish();
                                 }
                             });
             final AlertDialog alertDialog = builder.create();
