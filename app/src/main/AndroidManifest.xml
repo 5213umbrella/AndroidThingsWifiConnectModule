@@ -2,18 +2,33 @@
 <manifest package="hyunwook.co.kr.wifimodule"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG"
                      android:protectionLevel="signature|privileged"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+
+    <uses-permission
+        android:required="true"
+        android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-permission
+        android:required="true"
+        android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:required="true"
+        android:name="android.permission.INTERNET"/>
+    <uses-permission
+        android:required="true"
+        android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission
+        android:required="true"
+        android:name="android.permission.CHANGE_WIFI_STATE"/>
     <application
         android:name=".App"
         android:theme="@style/AppTheme">
-        <!--<uses-library android:name="com.google.android.things"/>-->
+        <uses-library android:name="com.google.android.things"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -29,12 +44,21 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ConnectingActivity">
+        <activity android:name=".ConnectingActivity"/>
+        <activity android:name=".ConnectingReceiver">
+
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
                 <action android:name="android.net.wifi.STATE_CHANGE"/>
             </intent-filter>
         </activity>
+
+        <receiver android:name=".NetworkChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.wifi.STATE_CHANGE"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

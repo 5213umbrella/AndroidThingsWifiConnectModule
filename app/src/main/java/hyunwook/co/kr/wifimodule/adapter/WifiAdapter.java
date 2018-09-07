@@ -44,6 +44,7 @@ public class WifiAdapter extends RecyclerView.Adapter<WifiAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
+//<<<<<<< HEAD
         if (holder.mItem.SSID.equals("")) {
             Log.d(TAG, "SSID check fail..");
         } else {
@@ -53,6 +54,21 @@ public class WifiAdapter extends RecyclerView.Adapter<WifiAdapter.ViewHolder> {
 
         int wifiSignalStrength = WifiManager.calculateSignalLevel(holder.mItem.level, 5);
         Log.d(TAG, "holder prequency ->" + holder.mItem.level + "Name " + holder.mItem.SSID + " signal --> " + wifiSignalStrength);
+/*
+=======
+
+        if (holder.mItem.SSID.equals("")) {
+            Log.d(TAG, "SSID check fail...");
+        }
+        else {
+            holder.wifiName.setText(holder.mItem.SSID);
+        }
+//        holder.wifiImage.setImageResource(holder.m);
+
+        int wifiSignalStrength = WifiManager.calculateSignalLevel(holder.mItem.level, 5);
+        Log.d(TAG, "holder prequency ->" + holder.mItem.level + "Name " + holder.mItem.SSID + " signal -->"  + wifiSignalStrength);
+>>>>>>> develop
+*/
 
         if (wifiSignalStrength == 4) {
             holder.wifiImage.setImageLevel(4);
@@ -97,6 +113,10 @@ public class WifiAdapter extends RecyclerView.Adapter<WifiAdapter.ViewHolder> {
             wifiName = view.findViewById(R.id.wifi_name);
             wifiImage = view.findViewById(R.id.wifi_icon);
             wifiImage.setImageResource(R.drawable.levellist);
+/*<<<<<<< HEAD
+=======
+
+>>>>>>> develop*/
         }
 
         @Override
