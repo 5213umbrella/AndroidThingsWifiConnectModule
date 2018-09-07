@@ -3,6 +3,8 @@ package hyunwook.co.kr.wifimodule.wifi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -71,6 +74,25 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         Button btnScan = view.findViewById(R.id.scanBtn);
         btnScan.setOnClickListener(view1 -> startScan());
+        Button btnFinish = view.findViewById(R.id.finishBtn);
+        btnFinish.setOnClickListener(view2 -> {
+            //@Override
+            //public void onClick(View view) {
+              getActivity().finish();
+            //}
+        });
+        WifiManager wm = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        int netType = (activeNetwork == null) ? -1 : activeNetwork.getType();
+        String ssidState;
+        if (netType == cm.TYPE_WIFI) {
+            ssidState = wm.getConnectionInfo().getSSID();
+            Log.d(TAG, "ssidstate ->" + ssidState.toString());
+            TextView titleView = view.findViewById(R.id.title_text);
+            titleView.setText(ssidState.toString());
+        }
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
@@ -91,6 +113,21 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         mContext.registerReceiver(receiver, intentFilter);
 
         startScan();
+
+
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        getActivity().getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        );
     }
 
     @Override
@@ -108,7 +145,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     @Override
     public void resultAvailable() {
         Log.d(TAG, "resultAvailable ======");
-        startScan();;
+        //startScan();;
     }
 
     @Override
@@ -117,7 +154,9 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             //wifi 이용가능
             showProgress(true);
 
-
+            fetchDevices();
+            showWifiDevices();
+            showProgress(false);
         } else {
             Log.d(TAG, "unable network");
         }
@@ -128,7 +167,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         if (progressBar != null) {
             progressBar.setVisibility((visibility) ? View.VISIBLE : View.INVISIBLE);
         }
-        fetchDevices();
+        //fetchDevices();
     }
 
     @Override
@@ -138,7 +177,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         Log.d(TAG, "wifi List size check ===>" + wifiList.size());
 
-        showWifiDevices();
+        //showWifiDevices();
     }
 
     @Override
@@ -165,7 +204,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         input.setHint("패스워드를 입력해주세요..");
         input.setWidth(70);
         input.setGravity(Gravity.CENTER);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
 
         builder.setView(input);
 
@@ -184,6 +223,12 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     public void connect(ScanResult device, String password) {
         showProgress(true);
 
+    /*    Intent intent = new Intent(mContext, ConnectingActivity.class);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("SSID", device.SSID);
+        intent.putExtra("password", password);
+
+        startActivity(intent);*/
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", device.SSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", password);

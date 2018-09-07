@@ -7,9 +7,25 @@
                 android:background="@drawable/on_pressed_background"
                 android:orientation="horizontal">
 
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:id="@+id/wifi_icon"
+        android:src="@drawable/wifi_6045_4"/>
     <TextView
+        android:text="SSID가 없는 Wi-Fi"
         android:id="@+id/wifi_name"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/wifi_icon"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="1dp"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_below="@+id/wifi_icon"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorAccent"></LinearLayout>
 </RelativeLayout>
