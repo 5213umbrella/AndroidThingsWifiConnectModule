@@ -2,16 +2,23 @@ package hyunwook.co.kr.wifimodule.wifi;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 
+import android.net.NetworkRequest;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
@@ -30,6 +37,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import hyunwook.co.kr.wifimodule.ConnectingActivity;
 import hyunwook.co.kr.wifimodule.ConnectingReceiver;
 import hyunwook.co.kr.wifimodule.R;
 import hyunwook.co.kr.wifimodule.adapter.WifiAdapter;
@@ -85,6 +93,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         progressBar = view.findViewById(R.id.progressBar);
 
+//        getActivity().registerReceiver(progressFinish, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
         Button btnScan = view.findViewById(R.id.scanBtn);
         btnScan.setOnClickListener(view1 -> startScan());
@@ -250,15 +259,90 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
                 .show();
     }
 
+    /**
+     * 09-07 09:39:44.593 302-382/system_process E/WifiConfigManager: Cannot find network with networkId -1 or configKey "KT_GiGA_2G_iosystem"NONE
+     UID 10114 does not have permission to update configuration "KT_GiGA_2G_iosystem"NONE
+     Failed to add/update network KT_GiGA_2G_iosystem
+     Looking up network with invalid networkId -1
+     * @param device
+     * @param password
+     */
     @Override
     public void connect(ScanResult device, String password) {
         showProgress(true);
-    /*    Intent intent = new Intent(mContext, ConnectingReceiver.class);
+     /*   Intent intent = new Intent(mContext, ConnectingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("SSID", device.SSID);
+        intent.putExtra("password", password);
+        startActivity(intent);
+*/
+//        전화를 액세스 포인트에 연결하는 방법
+        /**
+         * 최초 연결 이였던 와이파이 8
+         */
 
-        startActivity(intent);*/
+//Method to connect to WIFI Network
+//        public boolean connectTo(String networkSSID, String key) {
+            WifiConfiguration config = new WifiConfiguration();
+            WifiInfo info = mManager.getConnectionInfo(); //get WifiInfo
+            int id = info.getNetworkId(); //get id of currently connected network
 
-        WifiConfiguration wifiConfig = new WifiConfiguration();
+            config.SSID = "\"" + device.SSID + "\"";
+            if (password.isEmpty()) {
+                config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            }
+            int netID = mManager.addNetwork(config);
+
+//            int tempConfigId = getExistingNetworkId(config.SSID);
+
+        int tempConfigId = mManager.addNetwork(config);
+            if (tempConfigId != -1) {
+                netID = tempConfigId;
+            }
+
+            boolean disconnect = mManager.disconnect();
+            mManager.disableNetwork(id); //disable current network
+            boolean enabled = mManager.enableNetwork(netID, true);
+            boolean connected = mManager.reconnect();
+
+            if (((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))
+                    || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                    && !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))) {
+
+                Log.d(TAG, "Oreo");
+                final ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkRequest.Builder builder;
+                builder = new NetworkRequest.Builder();
+                //set the transport type do WIFI
+                builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+
+                manager.requestNetwork(builder.build(), new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(Network network) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            Log.d(TAG, "onAvailable ->"  +  network.toString());
+                            manager.bindProcessToNetwork(network);
+                        } else {
+                            ConnectivityManager.setProcessDefaultNetwork(network);
+                        }
+                        try {
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        manager.unregisterNetworkCallback(this);
+                        PackageManager pm = getActivity().getPackageManager();
+                        Intent sintent = pm.getLaunchIntentForPackage(getActivity().getPackageName());
+                        ComponentName scm = sintent.getComponent();
+
+                        Intent mainIntent = Intent.makeRestartActivityTask(scm);
+                        startActivity(mainIntent);
+                        System.exit(0);
+
+                    }
+                });
+            }
+      /*  WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", device.SSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", password);
 
@@ -268,6 +352,29 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         mManager.disconnect();
         mManager.enableNetwork(netId, true);
         mManager.reconnect();
+
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+*/
+        /**
+         * Cannot find network with networkId -1 or configKey "조현욱"NONE
+         UID 10110 does not have permission to update configuration "조현욱"NONE
+         Failed to add/update network 조현욱
+         *//*
+        if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
+            String ssid;
+
+            ssid = mManager.getConnectionInfo().getSSID();
+            Log.d(TAG, "progressFinish -->" + ssid);
+
+            PackageManager pm = getActivity().getPackageManager();
+            Intent sintent = pm.getLaunchIntentForPackage(getActivity().getPackageName());
+            ComponentName scm = sintent.getComponent();
+
+            Intent mainIntent = Intent.makeRestartActivityTask(scm);
+            startActivity(mainIntent);
+            System.exit(0);
+        }*/
     }
 
     private WifiContract.Presenter mPresenter;
@@ -278,6 +385,51 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
 
 
+    private BroadcastReceiver progressFinish = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "progressFinish receiver");
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+            /**
+             * Cannot find network with networkId -1 or configKey "조현욱"NONE
+             UID 10110 does not have permission to update configuration "조현욱"NONE
+             Failed to add/update network 조현욱
+             */
+            if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
+                String ssid;
+
+                ssid = mManager.getConnectionInfo().getSSID();
+//                Log.d(TAG, "wm connect ssid -->" +ssid + "want wifi ->" + device);
+//                if (ssid == device) {
+                    //연결하고자하는 와이파이랑 현재 연결된 와이파이가 같을 경우.
+                    //Log.d(TAG,/**/ "connected wifi...");
+
+                    //                ComponentName componentName = getPackageManager().getLaunchIntentForPackage("com.galarzaa.androidthings.samples").getComponent();
+                    //                Intent sintent = IntentCompat.makeRestartActivityTask(componentName);
+              /*  startActivity(sintent);
+                moveTaskToBack(true);
+                finish();
+                android.os.Process.killProcess(android.os.Process.myPid());*/
+
+           /*     Intent resIntent = new Intent();
+                resIntent.putExtra("result", "ok");
+                ConnectingActivity.this.setResult(Activity.RESULT_OK, resIntent);*/
+                    //SystemClock.sleep(5000);
+                Log.d(TAG, "progressFinish -->" + ssid);
+
+                    PackageManager pm = getActivity().getPackageManager();
+                    Intent sintent = pm.getLaunchIntentForPackage(getActivity().getPackageName());
+                    ComponentName scm = sintent.getComponent();
+
+                    Intent mainIntent = Intent.makeRestartActivityTask(scm);
+                    startActivity(mainIntent);
+                    System.exit(0);
+                }
+                //finish();
+            }
+
+    };
 
 }
