@@ -35,6 +35,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -92,13 +93,13 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         LayoutInflater mInflater = LayoutInflater.from(mContext);
 
         View mcus*/
+
         mContext = getActivity();
 
         mRecyclerView = view.findViewById(R.id.list);
 
         progressBar = view.findViewById(R.id.progressBar);
 
-//        getActivity().registerReceiver(progressFinish, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
         Button btnScan = view.findViewById(R.id.scanBtn);
         btnScan.setOnClickListener(view1 -> startScan());
@@ -110,6 +111,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             //}
         });
         WifiManager wm = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wm.setWifiEnabled(true);
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
@@ -283,7 +285,49 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
                 .setIcon(R.drawable.ios)
                 .show();
     }
-
+    public void connectToWifi(String ssid, String password){
+        try{
+            WifiManager wifiManager = (WifiManager) super.getContext().getSystemService(android.content.Context.WIFI_SERVICE);
+            WifiConfiguration wc = new WifiConfiguration();
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            wc.SSID = "\""+ssid+"\"";
+            wc.preSharedKey = "\""+password+"\"";
+            wc.status = WifiConfiguration.Status.ENABLED;
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            wifiManager.setWifiEnabled(true);
+            int netId = wifiManager.addNetwork(wc);
+            Log.d(TAG, "wcSSID1 -> " + wc.SSID);
+            if (netId == -1) {
+                Log.d(TAG, "wcSSID -> " + wc.SSID);
+                netId = getExistingNetworkId(wc.SSID);
+            }
+            wifiManager.disconnect();
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.reconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private int getExistingNetworkId(String SSID) {
+        WifiManager wifiManager = (WifiManager) super.getContext().getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
+        if (configuredNetworks != null) {
+            for (WifiConfiguration existingConfig : configuredNetworks) {
+                if (existingConfig.SSID.equals(SSID)) {
+                    return existingConfig.networkId;
+                }
+            }
+        }
+        return -1;
+    }
     /**
      * 09-07 09:39:44.593 302-382/system_process E/WifiConfigManager: Cannot find network with networkId -1 or configKey "KT_GiGA_2G_iosystem"NONE
      UID 10114 does not have permission to update configuration "KT_GiGA_2G_iosystem"NONE
@@ -301,14 +345,128 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         intent.putExtra("password", password);
         startActivity(intent);
 */
-//        전화를 액세스 포인트에 연결하는 방법
-        /**
-         * 최초 연결 이였던 와이파이 8
-         */
 
+        connectToWifi(device.SSID, password);
+
+////        전화를 액세스 포인트에 연결하는 방법
+//        /**
+//         * 최초 연결 이였던 와이파이 8
+//         */
+//        WifiConfiguration wifiConfig = new WifiConfiguration();
+//        wifiConfig.SSID = String.format("\"%s\"", device.SSID);
+//        wifiConfig.preSharedKey = String.format("\"%s\"", password);
+//
+//        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+////remember id
+//        int netId = wifiManager.addNetwork(wifiConfig);
+//        wifiManager.disconnect();
+//        wifiManager.enableNetwork(netId, true);
+//        wifiManager.reconnect();
+             //Add i harness ==========================
+        /*try {
+
+            Log.d("rht", "Item clicked, SSID " + device.SSID + " Security : " + device.capabilities);
+
+            String networkSSID = device.SSID;
+            String networkPass = "";
+
+            WifiConfiguration conf = new WifiConfiguration();
+            conf.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
+            conf.status = WifiConfiguration.Status.ENABLED;
+            conf.priority = 40;
+
+            if (device.capabilities.toUpperCase().contains("WEP")) {
+                Log.v("rht", "Configuring WEP");
+                conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                conf.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+                conf.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+
+                if (networkPass.matches("^[0-9a-fA-F]+$")) {
+                    conf.wepKeys[0] = networkPass;
+                } else {
+                    conf.wepKeys[0] = "\"".concat(networkPass).concat("\"");
+                }
+
+                conf.wepTxKeyIndex = 0;
+
+            } else if (device.capabilities.toUpperCase().contains("WPA")) {
+                Log.v("rht", "Configuring WPA");
+
+                conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+
+                conf.preSharedKey = "\"" + networkPass + "\"";
+
+            } else {
+                Log.v("rht", "Configuring OPEN network");
+                conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+                conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                conf.allowedAuthAlgorithms.clear();
+                conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            }
+
+            WifiManager wifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
+            int networkId = wifiManager.addNetwork(conf);
+
+            Log.v("rht", "Add result " + networkId);
+            if (networkId == -1) {
+                for (WifiConfiguration tmp : wifiManager.getConfiguredNetworks())
+                    if (tmp.SSID.equals( "\""+device.SSID+"\""))
+                    {
+                        Log.d(TAG, "networkId -> " +networkId);
+                        networkId = tmp.networkId;
+                        wifiManager.enableNetwork(networkId, true);
+                    }
+            }
+            else {
+                List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+                for (WifiConfiguration i : list) {
+                    if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                        Log.v("rht", "WifiConfiguration SSID " + i.SSID);
+
+                        boolean isDisconnected = wifiManager.disconnect();
+                        Log.v("rht", "isDisconnected : " + isDisconnected);
+
+                        boolean isEnabled = wifiManager.enableNetwork(i.networkId, true);
+                        Log.v("rht", "isEnabled : " + isEnabled);
+
+                        boolean isReconnected = wifiManager.reconnect();
+                        Log.v("rht", "isReconnected : " + isReconnected);
+
+                        break;
+                    }
+                }
+            }
+
+
+//            getActivity().registerReceiver(progressFinish, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+    }
 //Method to connect to WIFI Network
 //        public boolean connectTo(String networkSSID, String key) {
-            WifiConfiguration config = new WifiConfiguration();
+        /*    WifiConfiguration config = new WifiConfiguration();
             WifiInfo info = mManager.getConnectionInfo(); //get WifiInfo
             int id = info.getNetworkId(); //get id of currently connected network
 
@@ -369,7 +527,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
                     }
                 });
-            }
+            }*/
       /*  WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", device.SSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", password);
@@ -403,7 +561,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             startActivity(mainIntent);
             System.exit(0);
         }*/
-    }
+
 
 
     private WifiContract.Presenter mPresenter;

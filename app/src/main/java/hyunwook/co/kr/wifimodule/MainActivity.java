@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity /*implements EasyPermissions
                 .check();
         gotoWifiFragment();
 //        if (hasWifiPermission()) {
-            gotoWifiFragment();
+//            gotoWifiFragment();
 
     }
 /*
