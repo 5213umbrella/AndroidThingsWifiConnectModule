@@ -35,6 +35,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.List;
 
 import hyunwook.co.kr.wifimodule.ConnectingActivity;
@@ -114,7 +119,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             ssidState = wm.getConnectionInfo().getSSID();
             Log.d(TAG, "ssidstate ->" + ssidState.toString());
             TextView titleView = view.findViewById(R.id.title_text);
-            titleView.setText(ssidState.toString());
+            titleView.setText(ssidState.toString() + "--"+ getLocalIpAddress());
         }
 
     /*    Button btnFinish = view.findViewById(R.id.finishBtn);
@@ -145,6 +150,26 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         return view;
 
+    }
+
+    public static String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                NetworkInterface intf = en.nextElement();
+
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+            }
+
+            return "";
     }
 
     @Override
@@ -291,8 +316,11 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             if (password.isEmpty()) {
                 config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
             }
+//            config.preSharedKey = "\"" + password + "\"";
+
             int netID = mManager.addNetwork(config);
 
+            Log.d(TAG, "netId ---> "  + netID);
 //            int tempConfigId = getExistingNetworkId(config.SSID);
 
         int tempConfigId = mManager.addNetwork(config);
@@ -300,10 +328,10 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
                 netID = tempConfigId;
             }
 
-            boolean disconnect = mManager.disconnect();
+            mManager.disconnect();
             mManager.disableNetwork(id); //disable current network
-            boolean enabled = mManager.enableNetwork(netID, true);
-            boolean connected = mManager.reconnect();
+            mManager.enableNetwork(netID, true);
+            mManager.reconnect();
 
             if (((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))
                     || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -376,6 +404,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             System.exit(0);
         }*/
     }
+
 
     private WifiContract.Presenter mPresenter;
     @Override

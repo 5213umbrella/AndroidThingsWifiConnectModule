@@ -3,10 +3,9 @@
     package="hyunwook.co.kr.wifimodule"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
-
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG"
                      android:protectionLevel="signature|privileged"
-        tools:ignore="ProtectedPermissions" />
+                    tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
