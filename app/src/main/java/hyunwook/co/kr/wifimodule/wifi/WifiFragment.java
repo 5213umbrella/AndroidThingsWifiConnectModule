@@ -1,6 +1,7 @@
 package hyunwook.co.kr.wifimodule.wifi;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,11 +25,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -98,7 +101,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         btnFinish.setOnClickListener(view2 -> {
             //@Override
             //public void onClick(View view) {
-              getActivity().finish();
+            completeDialog(view2);
             //}
         });
         WifiManager wm = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -145,6 +148,41 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
     }
 
+    public void completeDialog(View v) {
+        Log.d(TAG, "completeDialog -----");
+
+        final Dialog dialog = new Dialog(v.getContext());
+        dialog.setCanceledOnTouchOutside(false);
+
+        dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        dialog.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+
+        dialog.setContentView(R.layout.dialog_complete);
+        dialog.setTitle("Wi-Fi");
+
+        dialog.findViewById(R.id.ok).setOnClickListener(l -> {
+            Log.d(TAG, "ok ---------------");
+            try {
+                Runtime.getRuntime().exec(new String[]{"reboot"});
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        dialog.findViewById(R.id.exit).setOnClickListener(e -> {
+            Log.d(TAG, "exit --------------");
+            getActivity().finish();
+        });
+
+        dialog.show();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+    }
     public static String getLocalIpAddress() {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
