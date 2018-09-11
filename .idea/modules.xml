@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/WiFIModule.iml" filepath="$PROJECT_DIR$/WiFIModule.iml" />
+      <module fileurl="file://F:\raspBlackeye\wifi\WiFIModule.iml" filepath="F:\raspBlackeye\wifi\WiFIModule.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/wifi.iml" filepath="$PROJECT_DIR$/wifi.iml" />
     </modules>
   </component>
 </project>

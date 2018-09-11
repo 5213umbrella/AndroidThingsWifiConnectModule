@@ -1,6 +1,5 @@
 package hyunwook.co.kr.wifimodule.wifi;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -9,19 +8,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-
-import android.net.NetworkRequest;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -35,7 +29,6 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -43,8 +36,6 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
 
-import hyunwook.co.kr.wifimodule.ConnectingActivity;
-import hyunwook.co.kr.wifimodule.ConnectingReceiver;
 import hyunwook.co.kr.wifimodule.R;
 import hyunwook.co.kr.wifimodule.adapter.WifiAdapter;
 import hyunwook.co.kr.wifimodule.listener.OnListFragmentInteractionListener;
@@ -70,7 +61,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     WifiBroadcastReceiver receiver;
     static final String TAG = WifiFragment.class.getSimpleName();
 
-
+    int netId;
     public static WifiFragment newInstance() {
         return new WifiFragment();
     }
@@ -121,7 +112,7 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             ssidState = wm.getConnectionInfo().getSSID();
             Log.d(TAG, "ssidstate ->" + ssidState.toString());
             TextView titleView = view.findViewById(R.id.title_text);
-            titleView.setText(ssidState.toString() + "--"+ getLocalIpAddress());
+            titleView.setText(ssidState.toString() + "--"+ getLocalIpAddress() +"--" + netId);
         }
 
     /*    Button btnFinish = view.findViewById(R.id.finishBtn);
@@ -308,6 +299,8 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
             if (netId == -1) {
                 Log.d(TAG, "wcSSID -> " + wc.SSID);
                 netId = getExistingNetworkId(wc.SSID);
+
+                Log.d(TAG, "netId -->" + netId);
             }
             wifiManager.disconnect();
             wifiManager.enableNetwork(netId, true);
@@ -339,6 +332,46 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
     @Override
     public void connect(ScanResult device, String password) {
         showProgress(true);
+
+        WifiConfiguration conf = new WifiConfiguration();
+        conf.SSID = "\"" + device.SSID + "\"";
+
+       /* conf.wepKeys[0] = "\"" + password + "\"";
+        conf.wepTxKeyIndex = 0;
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);*/
+
+       conf.preSharedKey = "\"" + password + "\"";
+
+       WifiManager wifiManager = (WifiManager)getContext().getSystemService(Context.WIFI_SERVICE);
+       wifiManager.addNetwork(conf);
+
+       List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+       for (WifiConfiguration i : list) {
+           Log.d(TAG, "start scan ");
+           if (i.SSID != null && i.SSID.equals("\"" + device.SSID + "\"")) {
+               Log.d(TAG, "search finish i=>" + i.SSID + "--" + i.networkId);
+               wifiManager.disconnect();
+               wifiManager.enableNetwork(i.networkId, true);
+               wifiManager.reconnect();
+
+               netId = i.networkId;
+
+               SystemClock.sleep(3000);
+               PackageManager pm = getActivity().getPackageManager();
+               Intent sintent = pm.getLaunchIntentForPackage(getActivity().getPackageName());
+               ComponentName scm = sintent.getComponent();
+
+               Intent mainIntent = Intent.makeRestartActivityTask(scm);
+               startActivity(mainIntent);
+               System.exit(0);
+               break;
+
+           }
+       }
+
+
+
      /*   Intent intent = new Intent(mContext, ConnectingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("SSID", device.SSID);
@@ -346,24 +379,24 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
         startActivity(intent);
 */
 
-        connectToWifi(device.SSID, password);
+        //connectToWifi(device.SSID, password);
 
-////        전화를 액세스 포인트에 연결하는 방법
-//        /**
-//         * 최초 연결 이였던 와이파이 8
-//         */
-//        WifiConfiguration wifiConfig = new WifiConfiguration();
-//        wifiConfig.SSID = String.format("\"%s\"", device.SSID);
-//        wifiConfig.preSharedKey = String.format("\"%s\"", password);
-//
-//        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-////remember id
-//        int netId = wifiManager.addNetwork(wifiConfig);
-//        wifiManager.disconnect();
-//        wifiManager.enableNetwork(netId, true);
-//        wifiManager.reconnect();
-             //Add i harness ==========================
-        /*try {
+        ////        전화를 액세스 포인트에 연결하는 방법
+        //        /**
+        //         * 최초 연결 이였던 와이파이 8
+        //         */
+        //        WifiConfiguration wifiConfig = new WifiConfiguration();
+        //        wifiConfig.SSID = String.format("\"%s\"", device.SSID);
+        //        wifiConfig.preSharedKey = String.format("\"%s\"", password);
+        //
+        //        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        ////remember id
+        //        int netId = wifiManager.addNetwork(wifiConfig);
+        //        wifiManager.disconnect();
+        //        wifiManager.enableNetwork(netId, true);
+        //        wifiManager.reconnect();
+        //Add i harness ==========================
+  /*      try {
 
             Log.d("rht", "Item clicked, SSID " + device.SSID + " Security : " + device.capabilities);
 
@@ -462,72 +495,73 @@ public class WifiFragment extends Fragment implements WifiContract.View, OnWifiL
 
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
-    }
-//Method to connect to WIFI Network
-//        public boolean connectTo(String networkSSID, String key) {
-        /*    WifiConfiguration config = new WifiConfiguration();
-            WifiInfo info = mManager.getConnectionInfo(); //get WifiInfo
-            int id = info.getNetworkId(); //get id of currently connected network
+        }
+    }*/
+     /*   //Method to connect to WIFI Network
+        //        public boolean connectTo(String networkSSID, String key) {
+        WifiConfiguration config = new WifiConfiguration();
+        WifiInfo info = mManager.getConnectionInfo(); //get WifiInfo
+        int id = info.getNetworkId(); //get id of currently connected network
 
-            config.SSID = "\"" + device.SSID + "\"";
-            if (password.isEmpty()) {
-                config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-            }
-//            config.preSharedKey = "\"" + password + "\"";
+        config.SSID = "\"" + device.SSID + "\"";
+        if (password.isEmpty()) {
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        }
+        //            config.preSharedKey = "\"" + password + "\"";
 
-            int netID = mManager.addNetwork(config);
+        int netID = mManager.addNetwork(config);
 
-            Log.d(TAG, "netId ---> "  + netID);
-//            int tempConfigId = getExistingNetworkId(config.SSID);
+        Log.d(TAG, "netId ---> " + netID);
+        //            int tempConfigId = getExistingNetworkId(config.SSID);
 
         int tempConfigId = mManager.addNetwork(config);
-            if (tempConfigId != -1) {
-                netID = tempConfigId;
-            }
+        if (tempConfigId != -1) {
+            netID = tempConfigId;
+        }
 
-            mManager.disconnect();
-            mManager.disableNetwork(id); //disable current network
-            mManager.enableNetwork(netID, true);
-            mManager.reconnect();
+        mManager.disconnect();
+        mManager.disableNetwork(id); //disable current network
+        mManager.enableNetwork(netID, true);
+        mManager.reconnect();
 
-            if (((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))
-                    || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                    && !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))) {
+        if (((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))
+                || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                && !(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M))) {
 
-                Log.d(TAG, "Oreo");
-                final ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkRequest.Builder builder;
-                builder = new NetworkRequest.Builder();
-                //set the transport type do WIFI
-                builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            Log.d(TAG, "Oreo");
+            final ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkRequest.Builder builder;
+            builder = new NetworkRequest.Builder();
+            //set the transport type do WIFI
+            builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
 
-                manager.requestNetwork(builder.build(), new ConnectivityManager.NetworkCallback() {
-                    @Override
-                    public void onAvailable(Network network) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            Log.d(TAG, "onAvailable ->"  +  network.toString());
-                            manager.bindProcessToNetwork(network);
-                        } else {
-                            ConnectivityManager.setProcessDefaultNetwork(network);
-                        }
-                        try {
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        manager.unregisterNetworkCallback(this);
-                        PackageManager pm = getActivity().getPackageManager();
-                        Intent sintent = pm.getLaunchIntentForPackage(getActivity().getPackageName());
-                        ComponentName scm = sintent.getComponent();
-
-                        Intent mainIntent = Intent.makeRestartActivityTask(scm);
-                        startActivity(mainIntent);
-                        System.exit(0);
-
+            manager.requestNetwork(builder.build(), new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        Log.d(TAG, "onAvailable ->" + network.toString());
+                        manager.bindProcessToNetwork(network);
+                    } else {
+                        ConnectivityManager.setProcessDefaultNetwork(network);
                     }
-                });
-            }*/
+                    try {
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    manager.unregisterNetworkCallback(this);
+                    PackageManager pm = getActivity().getPackageManager();
+                    Intent sintent = pm.getLaunchIntentForPackage(getActivity().getPackageName());
+                    ComponentName scm = sintent.getComponent();
+
+                    Intent mainIntent = Intent.makeRestartActivityTask(scm);
+                    startActivity(mainIntent);
+                    System.exit(0);
+
+                }
+            });
+        }*/
+    }
       /*  WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = String.format("\"%s\"", device.SSID);
         wifiConfig.preSharedKey = String.format("\"%s\"", password);
